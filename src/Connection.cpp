@@ -75,7 +75,7 @@ Connection::
     _outNode->nodeGraphicsObject().update();
   }
 
-  std::cout << "Connection destructor" << std::endl;
+ // std::cout << "Connection destructor" << std::endl;
 }
 
 
