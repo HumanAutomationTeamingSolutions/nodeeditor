@@ -41,7 +41,7 @@ Node(std::unique_ptr<NodeDataModel> && dataModel)
 Node::
 ~Node()
 {
-  std::cout << "Node destructor" << std::endl;
+  //std::cout << "Node destructor" << std::endl;
 }
 
 
