@@ -64,6 +64,12 @@ setStyle(QString jsonText)
     } \
 }
 
+#define FLOW_VIEW_STYLE_READ_BOOL(values, variable)  { \
+    auto valueRef = values[#variable]; \
+    FLOW_VIEW_STYLE_CHECK_UNDEFINED_VALUE(valueRef, variable) \
+    variable = valueRef.toBool(); \
+}
+
 void
 FlowViewStyle::
 loadJsonFile(QString styleFile)
@@ -104,4 +110,6 @@ loadJsonFromByteArray(QByteArray const &byteArray)
   FLOW_VIEW_STYLE_READ_COLOR(obj, BackgroundColor);
   FLOW_VIEW_STYLE_READ_COLOR(obj, FineGridColor);
   FLOW_VIEW_STYLE_READ_COLOR(obj, CoarseGridColor);
+
+  FLOW_VIEW_STYLE_READ_BOOL(obj, Grid);
 }

@@ -33,5 +33,6 @@ public:
   QColor BackgroundColor;
   QColor FineGridColor;
   QColor CoarseGridColor;
+  bool Grid;
 };
 }
