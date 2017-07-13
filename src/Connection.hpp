@@ -84,8 +84,11 @@ public:
 
 public:
 
-  ConnectionGraphicsObject&
+  ConnectionGraphicsObject const &
   getConnectionGraphicsObject() const;
+
+  ConnectionGraphicsObject &
+  getConnectionGraphicsObject();
 
   ConnectionState const &
   connectionState() const;
