@@ -230,11 +230,16 @@ removeFromNodes() const
 }
 
 
-ConnectionGraphicsObject&
+ConnectionGraphicsObject const &
 Connection::
 getConnectionGraphicsObject() const
 {
-  return *_connectionGraphicsObject;
+  return *_connectionGraphicsObject.get();
+}
+
+ConnectionGraphicsObject & QtNodes::Connection::getConnectionGraphicsObject()
+{
+    return *_connectionGraphicsObject;
 }
 
 
