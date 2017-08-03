@@ -2,8 +2,7 @@
   "FlowViewStyle": {
     "BackgroundColor": [53, 53, 53],
     "FineGridColor": [60, 60, 60],
-    "CoarseGridColor": [25, 25, 25],
-    "Grid": true
+    "CoarseGridColor": [25, 25, 25]
   },
   "NodeStyle": {
     "NormalBoundaryColor": [255, 255, 255],
