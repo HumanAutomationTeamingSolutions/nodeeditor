@@ -305,7 +305,7 @@ mouseMoveEvent(QMouseEvent *event)
         if((event->modifiers() & Qt::ShiftModifier) == 0)
         {
             QPointF difference = _clickPos - mapToScene(event->pos());
-            //setSceneRect(sceneRect().translated(difference.x(), difference.y()));
+            setSceneRect(sceneRect().translated(difference.x(), difference.y()));
         }
     }
 }
