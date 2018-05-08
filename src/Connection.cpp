@@ -252,17 +252,19 @@ removeFromNodes() const
     _outNode->nodeState().eraseConnection(PortType::Out, _outPortIndex, id());
 }
 
+//ConnectionGraphicsObject const &
+//Connection::
+//getConnectionGraphicsObject() const
+//{
+//  return *_connectionGraphicsObject.get();
+//}
 
-ConnectionGraphicsObject const &
+
+ConnectionGraphicsObject&
 Connection::
 getConnectionGraphicsObject() const
 {
-  return *_connectionGraphicsObject.get();
-}
-
-ConnectionGraphicsObject & QtNodes::Connection::getConnectionGraphicsObject()
-{
-    return *_connectionGraphicsObject;
+  return *_connectionGraphicsObject;
 }
 
 

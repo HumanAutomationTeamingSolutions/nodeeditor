@@ -86,11 +86,11 @@ public:
 
 public:
 
-  ConnectionGraphicsObject const &
+//    ConnectionGraphicsObject const &
+//    getConnectionGraphicsObject() const;
+//
+  ConnectionGraphicsObject&
   getConnectionGraphicsObject() const;
-
-  ConnectionGraphicsObject &
-  getConnectionGraphicsObject();
 
   ConnectionState const &
   connectionState() const;
