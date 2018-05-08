@@ -45,12 +45,16 @@ setConnectionStyle(QString jsonText)
   StyleCollection::setConnectionStyle(style);
 }
 
+#ifdef STYLE_DEBUG
+  #define CONNECTION_STYLE_CHECK_UNDEFINED_VALUE(v, variable) { \
+      if (v.type() == QJsonValue::Undefined || \
+          v.type() == QJsonValue::Null) \
+        qWarning() << "Undefined value for parameter:" << #variable; \
+  }
+#else
+  #define CONNECTION_STYLE_CHECK_UNDEFINED_VALUE(v, variable)
+#endif
 
-#define CONNECTION_STYLE_CHECK_UNDEFINED_VALUE(v, variable) { \
-    if (v.type() == QJsonValue::Undefined || \
-        v.type() == QJsonValue::Null) \
-      qWarning() << "Undefined value for parameter:" << #variable; \
-}
 
 #define CONNECTION_VALUE_EXISTS(v) \
   (v.type() != QJsonValue::Undefined && \
@@ -158,16 +162,16 @@ QColor
 ConnectionStyle::
 normalColor(QString typeId) const
 {
-    std::size_t hash = qHash(typeId);
+  std::size_t hash = qHash(typeId);
 
-    std::size_t const hue_range = 0xFF;
+  std::size_t const hue_range = 0xFF;
 
-    qsrand(hash);
-    std::size_t hue = qrand() % hue_range;
+  qsrand(hash);
+  std::size_t hue = qrand() % hue_range;
 
-    std::size_t sat = 120 + hash % 129;
+  std::size_t sat = 120 + hash % 129;
 
-    return QColor::fromHsl(hue,
+  return QColor::fromHsl(hue,
                          sat,
                          160);
 }
