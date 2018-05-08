@@ -1,13 +1,15 @@
 #pragma once
 
-#include <memory>
 #include <vector>
 #include <unordered_map>
 
 #include <QtCore/QUuid>
 
+#include "Export.hpp"
+
 #include "PortType.hpp"
 #include "NodeData.hpp"
+#include "memory.hpp"
 
 namespace QtNodes
 {
@@ -17,7 +19,7 @@ class NodeDataModel;
 
 /// Contains vectors of connected input and output connections.
 /// Stores bool for reacting on hovering connections
-class NodeState
+class NODE_EDITOR_PUBLIC NodeState
 {
 public:
   enum ReactToConnectionState

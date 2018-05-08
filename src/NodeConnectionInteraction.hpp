@@ -1,7 +1,5 @@
 #pragma once
 
-#include <memory>
-
 #include "Node.hpp"
 #include "Connection.hpp"
 
@@ -27,9 +25,8 @@ public:
   /// 2) Connection's vacant end is above the node port
   /// 3) Node port is vacant
   /// 4) Connection type equals node port type, or there is a registered type conversion that can translate between the two
-  bool canConnect(PortIndex &portIndex, 
-                  bool& typeConversionNeeded,
-                  std::unique_ptr<NodeDataModel> & converterModel) const;
+  bool canConnect(PortIndex & portIndex, 
+                  TypeConverter & converter) const;
 
   /// 1)   Check conditions from 'canConnect'
   /// 1.5) If the connection is possible but a type conversion is needed, add a converter node to the scene, and connect it properly
@@ -59,13 +56,13 @@ private:
                                          QPointF const &p) const;
 
   bool nodePortIsEmpty(PortType portType, PortIndex portIndex) const;
-  
+
 private:
 
   Node* _node;
 
   Connection* _connection;
-  
+
   FlowScene* _scene;
 };
 }
