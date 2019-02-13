@@ -59,10 +59,10 @@ public:
   setHovered(unsigned int h) { _hovered = h; }
 
   unsigned int
-  nSources() const { return _nSources; }
+  nSources() const;
 
   unsigned int
-  nSinks() const { return _nSinks; }
+  nSinks() const;
 
   QPointF const&
   draggingPos() const
@@ -92,12 +92,12 @@ public:
   QPointF
   portScenePosition(PortIndex index,
                     PortType portType,
-                    QTransform t = QTransform()) const;
+                    QTransform const & t = QTransform()) const;
 
   PortIndex
   checkHitScenePoint(PortType portType,
-                     QPointF const point,
-                     QTransform t = QTransform()) const;
+                     QPointF point,
+                     QTransform const & t = QTransform()) const;
 
   QRect
   resizeRect() const;

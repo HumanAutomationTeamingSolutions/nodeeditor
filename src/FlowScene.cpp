@@ -1,6 +1,7 @@
 #include "FlowScene.hpp"
 
 #include <stdexcept>
+#include <utility>
 
 #include <QtWidgets/QGraphicsSceneMoveEvent>
 #include <QtWidgets/QFileDialog>
@@ -12,8 +13,8 @@
 #include <QtCore/QJsonDocument>
 #include <QtCore/QJsonObject>
 #include <QtCore/QJsonArray>
-
-#include <QDebug>
+#include <QtCore/QtGlobal>
+#include <QtCore/QDebug>
 
 #include "Node.hpp"
 #include "NodeGraphicsObject.hpp"
@@ -41,9 +42,14 @@ FlowScene::
 FlowScene(std::shared_ptr<DataModelRegistry> registry,
           QObject * parent)
   : QGraphicsScene(parent)
-  , _registry(registry)
+  , _registry(std::move(registry))
 {
   setItemIndexMethod(QGraphicsScene::NoIndex);
+
+  // This connection should come first
+  connect(this, &FlowScene::connectionCreated, this, &FlowScene::setupConnectionSignals);
+  connect(this, &FlowScene::connectionCreated, this, &FlowScene::sendConnectionCreatedToNodes);
+  connect(this, &FlowScene::connectionDeleted, this, &FlowScene::sendConnectionDeletedToNodes);
 }
 
 FlowScene::
@@ -77,7 +83,16 @@ createConnection(PortType connectedPort,
 
   _connections[connection->id()] = connection;
 
-  connectionCreated(*connection);
+  // Note: this connection isn't truly created yet. It's only partially created.
+  // Thus, don't send the connectionCreated(...) signal.
+
+  connect(connection.get(),
+          &Connection::connectionCompleted,
+          this,
+          [this](Connection const& c) {
+            connectionCreated(c);
+          });
+
   return connection;
 }
 
@@ -158,6 +173,9 @@ restoreConnection(QJsonObject const &connectionJson)
                      *nodeOut, portIndexOut,
                      getConverter());
 
+  // Note: the connectionCreated(...) signal has already been sent
+  // by createConnection(...)
+
   return connection;
 }
 
@@ -166,9 +184,11 @@ void
 FlowScene::
 deleteConnection(Connection& connection)
 {
-  connectionDeleted(connection);
-  connection.removeFromNodes();
-  _connections.erase(connection.id());
+  auto it = _connections.find(connection.id());
+  if (it != _connections.end()) {
+    connection.removeFromNodes();
+    _connections.erase(it);
+  }
 }
 
 
@@ -222,21 +242,17 @@ removeNode(Node& node)
   // call signal
   nodeDeleted(node);
 
-  auto deleteConnections =
-    [&node, this] (PortType portType)
+  for(auto portType: {PortType::In,PortType::Out})
+  {
+    auto nodeState = node.nodeState();
+    auto const & nodeEntries = nodeState.getEntries(portType);
+
+    for (auto &connections : nodeEntries)
     {
-      auto nodeState = node.nodeState();
-      auto const & nodeEntries = nodeState.getEntries(portType);
-
-      for (auto &connections : nodeEntries)
-      {
-        for (auto const &pair : connections)
-          deleteConnection(*pair.second);
-      }
-    };
-
-  deleteConnections(PortType::In);
-  deleteConnections(PortType::Out);
+      for (auto const &pair : connections)
+        deleteConnection(*pair.second);
+    }
+  }
 
   _nodes.erase(node.id());
 }
@@ -254,13 +270,13 @@ void
 FlowScene::
 setRegistry(std::shared_ptr<DataModelRegistry> registry)
 {
-  _registry = registry;
+  _registry = std::move(registry);
 }
 
 
 void
 FlowScene::
-iterateOverNodes(std::function<void(Node*)> visitor)
+iterateOverNodes(std::function<void(Node*)> const & visitor)
 {
   for (const auto& _node : _nodes)
   {
@@ -271,7 +287,7 @@ iterateOverNodes(std::function<void(Node*)> visitor)
 
 void
 FlowScene::
-iterateOverNodeData(std::function<void(NodeDataModel*)> visitor)
+iterateOverNodeData(std::function<void(NodeDataModel*)> const & visitor)
 {
   for (const auto& _node : _nodes)
   {
@@ -282,7 +298,7 @@ iterateOverNodeData(std::function<void(NodeDataModel*)> visitor)
 
 void
 FlowScene::
-iterateOverNodeDataDependentOrder(std::function<void(NodeDataModel*)> visitor)
+iterateOverNodeDataDependentOrder(std::function<void(NodeDataModel*)> const & visitor)
 {
   std::set<QUuid> visitedNodesSet;
 
@@ -428,15 +444,14 @@ clearScene()
   //Manual node cleanup. Simply clearing the holding datastructures doesn't work, the code crashes when
   // there are both nodes and connections in the scene. (The data propagation internal logic tries to propagate
   // data through already freed connections.)
-  std::vector<Node*> nodesToDelete;
-  for (auto& node : _nodes)
+  while (_connections.size() > 0)
   {
-    nodesToDelete.push_back(node.second.get());
+    deleteConnection( *_connections.begin()->second );
   }
 
-  for (auto& node : nodesToDelete)
+  while (_nodes.size() > 0)
   {
-    removeNode(*node);
+    removeNode( *_nodes.begin()->second );
   }
 }
 
@@ -537,17 +552,59 @@ loadFromMemory(const QByteArray& data)
 
   QJsonArray nodesJsonArray = jsonDocument["nodes"].toArray();
 
-  for (int i = 0; i < nodesJsonArray.size(); ++i)
+  for (QJsonValueRef node : nodesJsonArray)
   {
-    restoreNode(nodesJsonArray[i].toObject());
+    restoreNode(node.toObject());
   }
 
   QJsonArray connectionJsonArray = jsonDocument["connections"].toArray();
 
-  for (int i = 0; i < connectionJsonArray.size(); ++i)
+  for (QJsonValueRef connection : connectionJsonArray)
   {
-    restoreConnection(connectionJsonArray[i].toObject());
+    restoreConnection(connection.toObject());
   }
+}
+
+
+void
+FlowScene::
+setupConnectionSignals(Connection const& c)
+{
+  connect(&c,
+          &Connection::connectionMadeIncomplete,
+          this,
+          &FlowScene::connectionDeleted,
+          Qt::UniqueConnection);
+}
+
+
+void
+FlowScene::
+sendConnectionCreatedToNodes(Connection const& c)
+{
+  Node* from = c.getNode(PortType::Out);
+  Node* to   = c.getNode(PortType::In);
+
+  Q_ASSERT(from != nullptr);
+  Q_ASSERT(to != nullptr);
+
+  from->nodeDataModel()->outputConnectionCreated(c);
+  to->nodeDataModel()->inputConnectionCreated(c);
+}
+
+
+void
+FlowScene::
+sendConnectionDeletedToNodes(Connection const& c)
+{
+  Node* from = c.getNode(PortType::Out);
+  Node* to   = c.getNode(PortType::In);
+
+  Q_ASSERT(from != nullptr);
+  Q_ASSERT(to != nullptr);
+
+  from->nodeDataModel()->outputConnectionDeleted(c);
+  to->nodeDataModel()->inputConnectionDeleted(c);
 }
 
 
@@ -557,7 +614,7 @@ namespace QtNodes
 
 Node*
 locateNodeAt(QPointF scenePoint, FlowScene &scene,
-             QTransform viewTransform)
+             QTransform const & viewTransform)
 {
   // items under cursor
   QList<QGraphicsItem*> items =

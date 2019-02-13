@@ -38,6 +38,17 @@ NodeGeometry(std::unique_ptr<NodeDataModel> const &dataModel)
   _boldFontMetrics = QFontMetrics(f);
 }
 
+unsigned int
+NodeGeometry::nSources() const
+{
+  return _dataModel->nPorts(PortType::Out);
+}
+
+unsigned int
+NodeGeometry::nSinks() const
+{
+  return _dataModel->nPorts(PortType::In);
+}
 
 QRectF
 NodeGeometry::
@@ -133,7 +144,7 @@ QPointF
 NodeGeometry::
 portScenePosition(PortIndex index,
                   PortType portType,
-                  QTransform t) const
+                  QTransform const & t) const
 {
   auto const &nodeStyle = StyleCollection::nodeStyle();
 
@@ -180,7 +191,7 @@ PortIndex
 NodeGeometry::
 checkHitScenePoint(PortType portType,
                    QPointF const scenePoint,
-                   QTransform sceneTransform) const
+                   QTransform const & sceneTransform) const
 {
   auto const &nodeStyle = StyleCollection::nodeStyle();
 
