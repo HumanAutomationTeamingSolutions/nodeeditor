@@ -1,6 +1,7 @@
 #include "Connection.hpp"
 
-#include <math.h>
+#include <cmath>
+#include <utility>
 
 #include <QtWidgets/QtWidgets>
 #include <QtGlobal>
@@ -48,14 +49,14 @@ Connection(Node& nodeIn,
            PortIndex portIndexIn,
            Node& nodeOut,
            PortIndex portIndexOut,
-           TypeConverter const & typeConverter)
+           TypeConverter typeConverter)
   : _uid(QUuid::createUuid())
   , _outNode(&nodeOut)
   , _inNode(&nodeIn)
   , _outPortIndex(portIndexOut)
   , _inPortIndex(portIndexIn)
   , _connectionState()
-  , _converter(typeConverter)
+  , _converter(std::move(typeConverter))
 {
   setNodeToPort(nodeIn, PortType::In, portIndexIn);
   setNodeToPort(nodeOut, PortType::Out, portIndexOut);
@@ -65,6 +66,7 @@ Connection(Node& nodeIn,
 Connection::
 ~Connection()
 {
+  if (complete()) connectionMadeIncomplete(*this);
   propagateEmptyData();
 
   if (_inNode)
@@ -123,6 +125,14 @@ Connection::
 id() const
 {
   return _uid;
+}
+
+
+bool
+Connection::
+complete() const
+{
+  return _inNode != nullptr && _outNode != nullptr;
 }
 
 
@@ -226,6 +236,8 @@ setNodeToPort(Node& node,
               PortType portType,
               PortIndex portIndex)
 {
+  bool wasIncomplete = !complete();
+
   auto& nodeWeak = getNode(portType);
 
   nodeWeak = &node;
@@ -238,6 +250,9 @@ setNodeToPort(Node& node,
   _connectionState.setNoRequiredPort();
 
   updated(*this);
+  if (complete() && wasIncomplete) {
+    connectionCompleted(*this);
+  }
 }
 
 
@@ -348,6 +363,10 @@ void
 Connection::
 clearNode(PortType portType)
 {
+  if (complete()) {
+    connectionMadeIncomplete(*this);
+  }
+
   getNode(portType) = nullptr;
 
   if (portType == PortType::In)

@@ -43,10 +43,6 @@ public:
   name() const override
   { return QStringLiteral("NumberSource"); }
 
-  std::unique_ptr<NodeDataModel>
-  clone() const override
-  { return std::make_unique<NumberSourceDataModel>(); }
-
 public:
 
   QJsonObject
@@ -73,7 +69,7 @@ public:
   QWidget *
   embeddedWidget() override { return _lineEdit; }
 
-private slots:
+private Q_SLOTS:
 
   void
   onTextEdited(QString const &string);

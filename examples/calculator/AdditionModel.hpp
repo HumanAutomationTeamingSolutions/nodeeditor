@@ -28,10 +28,6 @@ public:
   name() const override
   { return QStringLiteral("Addition"); }
 
-  std::unique_ptr<NodeDataModel>
-  clone() const override
-  { return std::make_unique<AdditionModel>(); }
-
 private:
 
   void
@@ -56,6 +52,6 @@ private:
       _result.reset();
     }
 
-    emit dataUpdated(outPortIndex);
+    Q_EMIT dataUpdated(outPortIndex);
   }
 };

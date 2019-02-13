@@ -57,10 +57,6 @@ public:
   name() const override
   { return QStringLiteral("Subtraction"); }
 
-  std::unique_ptr<NodeDataModel>
-  clone() const override
-  { return std::make_unique<SubtractionModel>(); }
-
 private:
 
   void
@@ -85,6 +81,6 @@ private:
       _result.reset();
     }
 
-    emit dataUpdated(outPortIndex);
+    Q_EMIT dataUpdated(outPortIndex);
   }
 };

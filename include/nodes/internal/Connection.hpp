@@ -45,7 +45,7 @@ public:
              PortIndex portIndexIn,
              Node& nodeOut,
              PortIndex portIndexOut,
-             TypeConverter const & converter =
+             TypeConverter converter =
                TypeConverter{});
 
   Connection(const Connection&) = delete;
@@ -121,6 +121,9 @@ public:
   void
   setTypeConverter(TypeConverter converter);
 
+  bool
+  complete() const;
+
 public: // data propagation
 
   void
@@ -128,6 +131,14 @@ public: // data propagation
 
   void
   propagateEmptyData() const;
+
+Q_SIGNALS:
+
+  void
+  connectionCompleted(Connection const&) const;
+
+  void
+  connectionMadeIncomplete(Connection const&) const;
 
 private:
 
@@ -150,7 +161,7 @@ private:
 
   TypeConverter _converter;
 
-signals:
+Q_SIGNALS:
 
   void
   updated(Connection& conn) const;

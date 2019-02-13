@@ -6,10 +6,35 @@ project(NodeEditor CXX)
 set(CMAKE_DISABLE_IN_SOURCE_BUILD ON)
 set(CMAKE_DISABLE_SOURCE_CHANGES  ON)
 
-option(BUILD_EXAMPLES "Build Examples" ON)
+get_directory_property(_has_parent PARENT_DIRECTORY)
+if(_has_parent)
+  set(is_root_project OFF)
+else()
+  set(is_root_project ON)
+endif()
+
+set(NE_DEVELOPER_DEFAULTS "${is_root_project}" CACHE BOOL "Turns on default settings for development of NodeEditor")
+
+option(BUILD_TESTING "Build tests" "${NE_DEVELOPER_DEFAULTS}")
+option(BUILD_EXAMPLES "Build Examples" "${NE_DEVELOPER_DEFAULTS}")
+option(BUILD_SHARED_LIBS "Build as shared library" ON)
+option(NE_FORCE_TEST_COLOR "Force colorized unit test output" OFF)
+
+enable_testing()
+
+if(NE_DEVELOPER_DEFAULTS)
+  set(CMAKE_CXX_STANDARD 14)
+  set(CMAKE_CXX_EXTENSIONS OFF)
+
+  set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/bin")
+  set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/lib")
+  set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/lib")
+endif()
+
+add_subdirectory(external)
 
 # Find the QtWidgets library
-find_package(Qt5 COMPONENTS
+find_package(Qt5 5.3 COMPONENTS
              Core
              Widgets
              Gui
@@ -46,15 +71,15 @@ set(CPP_SOURCE_FILES
 )
 
 # If we want to give the option to build a static library,
-# leave off SHARED here and use BUILD_SHARED_LIBS to
-# choose whether to add -D NODE_EDITOR_SHARED
-add_library(nodes SHARED
+# set BUILD_SHARED_LIBS option to OFF
+add_library(nodes
   ${CPP_SOURCE_FILES}
   ${RESOURCES}
 )
+add_library(NodeEditor::nodes ALIAS nodes)
 
 target_include_directories(nodes
-  PUBLIC 
+  PUBLIC
     $<INSTALL_INTERFACE:include>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
   PRIVATE
@@ -77,6 +102,7 @@ target_compile_definitions(nodes
   PRIVATE
     NODE_EDITOR_EXPORTS
     #NODE_DEBUG_DRAWING
+    QT_NO_KEYWORDS
 )
 
 target_compile_options(nodes
@@ -118,6 +144,14 @@ target_sources(nodes PRIVATE ${nodes_moc})
 
 if(BUILD_EXAMPLES)
   add_subdirectory(examples)
+endif()
+
+##################
+# Automated Tests
+##
+
+if(BUILD_TESTING)
+  add_subdirectory(test)
 endif()
 
 ###############
