@@ -69,8 +69,7 @@ boundingRect() const
 {
   auto const &nodeStyle = StyleCollection::nodeStyle();
 
-  /// Kenny Chang 4 to 2
-  double addon = 2 * nodeStyle.ConnectionPointDiameter;
+  double addon = 4 * nodeStyle.ConnectionPointDiameter;
 
   return QRectF(0 - addon,
                 0 - addon,
