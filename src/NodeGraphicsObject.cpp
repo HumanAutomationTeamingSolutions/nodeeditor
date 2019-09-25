@@ -200,7 +200,8 @@ void
 NodeGraphicsObject::
 mousePressEvent(QGraphicsSceneMouseEvent * event)
 {
-  if (_locked)
+  /// KW : Add for ItemIsMovable
+  if (_locked && (flags() & QGraphicsItem::ItemIsMovable) == 0)
     return;
 
   // deselect all other items after this one is selected
@@ -209,6 +210,11 @@ mousePressEvent(QGraphicsSceneMouseEvent * event)
   {
     _scene.clearSelection();
   }
+
+  /// KW : Add for ItemIsMovable
+  if (_locked)
+    return;
+
 
   for (PortType portToCheck: {PortType::In, PortType::Out})
   {
