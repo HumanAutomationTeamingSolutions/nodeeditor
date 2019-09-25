@@ -1,3 +1,10 @@
 *.py
 *.pyc
 CMakeLists.txt.user
+
+# JetBrains
+.idea/
+
+# CMake
+cmake-build-*/
+cmake-build/
