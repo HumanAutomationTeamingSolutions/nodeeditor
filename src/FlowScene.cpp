@@ -230,6 +230,7 @@ restoreNode(QJsonObject const& nodeJson)
   auto nodePtr = node.get();
   _nodes[node->id()] = std::move(node);
 
+  nodePlaced(*nodePtr);
   nodeCreated(*nodePtr);
   return *nodePtr;
 }
@@ -409,6 +410,21 @@ FlowScene::
 connections() const
 {
   return _connections;
+}
+
+
+std::vector<Node*>
+FlowScene::
+allNodes() const
+{
+  std::vector<Node*> nodes;
+
+  std::transform(_nodes.begin(),
+                 _nodes.end(),
+                 std::back_inserter(nodes),
+                 [](std::pair<QUuid const, std::unique_ptr<Node>> const & p) { return p.second.get(); });
+
+  return nodes;
 }
 
 
