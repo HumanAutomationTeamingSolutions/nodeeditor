@@ -52,6 +52,12 @@ public:
   void
   setSpacing(unsigned int s) { _spacing = s; }
 
+  unsigned int
+  captionPaddingWidth() const { return _captionPaddingWidth; }
+
+  void
+  setCaptionPaddingWidth(unsigned int s) { _captionPaddingWidth = s; }
+
   bool
   hovered() const { return _hovered; }
 
@@ -146,6 +152,7 @@ private:
   mutable unsigned int _outputPortWidth;
   mutable unsigned int _entryHeight;
   unsigned int _spacing;
+  unsigned int _captionPaddingWidth;
 
   bool _hovered;
 

@@ -25,6 +25,7 @@ NodeGeometry(std::unique_ptr<NodeDataModel> const &dataModel)
   , _outputPortWidth(70)
   , _entryHeight(20)
   , _spacing(20)
+  , _captionPaddingWidth(0)
   , _hovered(false)
   , _nSources(dataModel->nPorts(PortType::Out))
   , _nSinks(dataModel->nPorts(PortType::In))
@@ -251,11 +252,11 @@ widgetPosition() const
       if (_dataModel->validationState() != NodeValidationState::Valid)
       {
         return QPointF(_spacing + portWidth(PortType::In),
-                      (captionHeight() + _height - validationHeight() - _spacing - w->height()) / 2.0);
+                       (captionHeight() + _height - validationHeight() - _spacing - w->height()) / 2.0);
       }
 
-      return QPointF(_spacing + portWidth(PortType::In), 
-                    (captionHeight() + _height - w->height()) / 2.0);
+      return QPointF(_spacing + portWidth(PortType::In),
+                     (captionHeight() + _height - w->height()) / 2.0);
     }
   }
   return QPointF();
@@ -295,7 +296,7 @@ captionWidth() const
 
   QString name = _dataModel->caption();
 
-  return _boldFontMetrics.boundingRect(name).width();
+  return _boldFontMetrics.boundingRect(name).width() + captionPaddingWidth();
 }
 
 
@@ -321,8 +322,8 @@ validationWidth() const
 
 QPointF
 NodeGeometry::
-calculateNodePositionBetweenNodePorts(PortIndex targetPortIndex, PortType targetPort, Node* targetNode, 
-                                      PortIndex sourcePortIndex, PortType sourcePort, Node* sourceNode, 
+calculateNodePositionBetweenNodePorts(PortIndex targetPortIndex, PortType targetPort, Node* targetNode,
+                                      PortIndex sourcePortIndex, PortType sourcePort, Node* sourceNode,
                                       Node& newNode)
 {
   //Calculating the nodes position in the scene. It'll be positioned half way between the two ports that it "connects". 
@@ -330,7 +331,7 @@ calculateNodePositionBetweenNodePorts(PortIndex targetPortIndex, PortType target
   //The second line offsets this coordinate with the size of the new node, so that the new nodes center falls on the originally
   //calculated coordinate, instead of it's upper left corner.
   auto converterNodePos = (sourceNode->nodeGraphicsObject().pos() + sourceNode->nodeGeometry().portScenePosition(sourcePortIndex, sourcePort) +
-    targetNode->nodeGraphicsObject().pos() + targetNode->nodeGeometry().portScenePosition(targetPortIndex, targetPort)) / 2.0f;
+                           targetNode->nodeGraphicsObject().pos() + targetNode->nodeGeometry().portScenePosition(targetPortIndex, targetPort)) / 2.0f;
   converterNodePos.setX(converterNodePos.x() - newNode.nodeGeometry().width() / 2.0f);
   converterNodePos.setY(converterNodePos.y() - newNode.nodeGeometry().height() / 2.0f);
   return converterNodePos;
