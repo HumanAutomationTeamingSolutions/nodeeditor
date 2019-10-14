@@ -9,12 +9,11 @@ using QtNodes::PortType;
 
 ConnectionGeometry::
 ConnectionGeometry()
-  : _in(0, 0)
-  , _out(0, 0)
+  : _in(0, 0),
+    _out(0, 0)
   //, _animationPhase(0)
-  , _lineWidth(3.0)
-  , _hovered(false)
-{ }
+  , _lineWidth(3.0),
+    _hovered(false) {}
 
 QPointF const&
 ConnectionGeometry::
@@ -50,7 +49,7 @@ setEndPoint(PortType portType, QPointF const& point)
 
 void
 ConnectionGeometry::
-moveEndPoint(PortType portType, QPointF const &offset)
+moveEndPoint(PortType portType, QPointF const& offset)
 {
   switch (portType)
   {
@@ -78,7 +77,7 @@ boundingRect() const
 
   QRectF c1c2Rect = QRectF(points.first, points.second).normalized();
 
-  auto const &connectionStyle =
+  auto const& connectionStyle =
     StyleCollection::connectionStyle();
 
   float const diam = connectionStyle.pointDiameter();
@@ -101,17 +100,13 @@ pointsC1C2() const
   const double defaultOffset = 200;
 
   double xDistance = _in.x() - _out.x();
-
   double horizontalOffset = qMin(defaultOffset, std::abs(xDistance));
-
   double verticalOffset = 0;
-
   double ratioX = 0.5;
 
   if (xDistance <= 0)
   {
-    double yDistance = _in.y() - _out.y() + 20;
-
+    double yDistance = _in.y() - _out.y() + 60;
     double vector = yDistance < 0 ? -1.0 : 1.0;
 
     verticalOffset = qMin(defaultOffset, std::abs(yDistance)) * vector;
