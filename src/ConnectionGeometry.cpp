@@ -106,7 +106,7 @@ pointsC1C2() const
 
   if (xDistance <= 0)
   {
-    double yDistance = _in.y() - _out.y() + 60;
+    double yDistance = _in.y() - _out.y() + 20;
     double vector = yDistance < 0 ? -1.0 : 1.0;
 
     verticalOffset = qMin(defaultOffset, std::abs(yDistance)) * vector;
