@@ -2,6 +2,6 @@
     <qresource>
         <file>DefaultStyle.json</file>
         <file>convert.png</file>
-        <file>Refresh.svg</file>
+        <file>convert.svg</file>
     </qresource>
 </RCC>
