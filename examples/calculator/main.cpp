@@ -50,7 +50,6 @@ registerDataModels()
                              TypeConverter{DecimalToIntegerConverter()});
 
 
-
   ret->registerTypeConverter(std::make_pair(IntegerData().type(),
                                             DecimalData().type()),
                              TypeConverter{IntegerToDecimalConverter()});
@@ -85,7 +84,7 @@ setStyle()
 
 
 int
-main(int argc, char *argv[])
+main(int argc, char* argv[])
 {
   QApplication app(argc, argv);
 
@@ -93,11 +92,11 @@ main(int argc, char *argv[])
 
   QWidget mainWidget;
 
-  auto menuBar    = new QMenuBar();
+  auto menuBar = new QMenuBar();
   auto saveAction = menuBar->addAction("Save..");
   auto loadAction = menuBar->addAction("Load..");
 
-  QVBoxLayout *l = new QVBoxLayout(&mainWidget);
+  QVBoxLayout* l = new QVBoxLayout(&mainWidget);
 
   l->addWidget(menuBar);
   auto scene = new FlowScene(registerDataModels(), &mainWidget);

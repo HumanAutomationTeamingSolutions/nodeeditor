@@ -1,6 +1,7 @@
 #include "ConnectionPainter.hpp"
 
 #include <QtGui/QIcon>
+#include <QtSvg/QSvgRenderer>
 
 #include "ConnectionGeometry.hpp"
 #include "ConnectionState.hpp"
@@ -226,7 +227,7 @@ drawNormalLine(QPainter * painter,
   {
     painter->setBrush(Qt::NoBrush);
 
-    QColor c = normalColorOut; 
+    QColor c = normalColorOut;
     if (selected)
       c = c.darker(200);
     p.setColor(c);
@@ -241,7 +242,7 @@ drawNormalLine(QPainter * painter,
 
       if (i == segments / 2)
       {
-        QColor c = normalColorIn; 
+        QColor c = normalColorIn;
         if (selected)
           c = c.darker(200);
 
@@ -252,15 +253,27 @@ drawNormalLine(QPainter * painter,
                         cubic.pointAtPercent(ratio));
     }
 
-    {
-      QIcon icon(":convert.png");
 
-      QPixmap pixmap = icon.pixmap(QSize(22, 22));
-      painter->drawPixmap(cubic.pointAtPercent(0.50) - QPoint(pixmap.width()/2,
-                                                              pixmap.height()/2),
-                          pixmap);
+    {
+      QSize icon_size(22, 22);
+      QSvgRenderer icon(QString(":convert.svg"));
+
+      QPointF top_left = cubic.pointAtPercent(0.50) - QPoint(icon_size.width()/2,
+                                                            icon_size.height()/2);
+      QRectF icon_rect(top_left, icon_size);
+      icon.render(painter, icon_rect);
 
     }
+
+//    {
+//      QIcon icon(":convert.png");
+//
+//      QPixmap pixmap = icon.pixmap(QSize(22, 22));
+//      painter->drawPixmap(cubic.pointAtPercent(0.50) - QPoint(pixmap.width()/2,
+//                                                              pixmap.height()/2),
+//                          pixmap);
+//
+//    }
   }
   else
   {
