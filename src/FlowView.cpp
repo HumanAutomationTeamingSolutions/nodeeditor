@@ -27,16 +27,16 @@ using QtNodes::FlowView;
 using QtNodes::FlowScene;
 
 FlowView::
-FlowView(QWidget *parent)
-  : QGraphicsView(parent)
-  , _clearSelectionAction(Q_NULLPTR)
-  , _deleteSelectionAction(Q_NULLPTR)
-  , _scene(Q_NULLPTR)
+FlowView(QWidget* parent)
+  : QGraphicsView(parent),
+  _clearSelectionAction(Q_NULLPTR),
+  _deleteSelectionAction(Q_NULLPTR),
+  _scene(Q_NULLPTR)
 {
   setDragMode(QGraphicsView::ScrollHandDrag);
   setRenderHint(QPainter::Antialiasing);
 
-  auto const &flowViewStyle = StyleCollection::flowViewStyle();
+  auto const& flowViewStyle = StyleCollection::flowViewStyle();
 
   setBackgroundBrush(flowViewStyle.BackgroundColor);
 
@@ -54,7 +54,7 @@ FlowView(QWidget *parent)
 
 
 FlowView::
-FlowView(FlowScene *scene, QWidget *parent)
+FlowView(FlowScene* scene, QWidget* parent)
   : FlowView(parent)
 {
   setScene(scene);
@@ -78,7 +78,7 @@ deleteSelectionAction() const
 
 
 void
-FlowView::setScene(FlowScene *scene)
+FlowView::setScene(FlowScene* scene)
 {
   _scene = scene;
   QGraphicsView::setScene(_scene);
@@ -100,7 +100,7 @@ FlowView::setScene(FlowScene *scene)
 
 void
 FlowView::
-contextMenuEvent(QContextMenuEvent *event)
+contextMenuEvent(QContextMenuEvent* event)
 {
   if (itemAt(event->pos()))
   {
@@ -113,27 +113,27 @@ contextMenuEvent(QContextMenuEvent *event)
   auto skipText = QStringLiteral("skip me");
 
   //Add filterbox to the context menu
-  auto *txtBox = new QLineEdit(&modelMenu);
+  auto* txtBox = new QLineEdit(&modelMenu);
 
   txtBox->setPlaceholderText(QStringLiteral("Filter"));
   txtBox->setClearButtonEnabled(true);
 
-  auto *txtBoxAction = new QWidgetAction(&modelMenu);
+  auto* txtBoxAction = new QWidgetAction(&modelMenu);
   txtBoxAction->setDefaultWidget(txtBox);
 
   modelMenu.addAction(txtBoxAction);
 
   //Add result treeview to the context menu
-  auto *treeView = new QTreeWidget(&modelMenu);
+  auto* treeView = new QTreeWidget(&modelMenu);
   treeView->header()->close();
 
-  auto *treeViewAction = new QWidgetAction(&modelMenu);
+  auto* treeViewAction = new QWidgetAction(&modelMenu);
   treeViewAction->setDefaultWidget(treeView);
 
   modelMenu.addAction(treeViewAction);
 
   QMap<QString, QTreeWidgetItem*> topLevelItems;
-  for (auto const &cat : _scene->registry().categories())
+  for (auto const& cat : _scene->registry().categories())
   {
     auto item = new QTreeWidgetItem(treeView);
     item->setText(0, cat);
@@ -141,17 +141,17 @@ contextMenuEvent(QContextMenuEvent *event)
     topLevelItems[cat] = item;
   }
 
-  for (auto const &assoc : _scene->registry().registeredModelsCategoryAssociation())
+  for (auto const& assoc : _scene->registry().registeredModelsCategoryAssociation())
   {
     auto parent = topLevelItems[assoc.second];
-    auto item   = new QTreeWidgetItem(parent);
+    auto item = new QTreeWidgetItem(parent);
     item->setText(0, assoc.first);
     item->setData(0, Qt::UserRole, assoc.first);
   }
 
   treeView->expandAll();
 
-  connect(treeView, &QTreeWidget::itemClicked, [&](QTreeWidgetItem *item, int)
+  connect(treeView, &QTreeWidget::itemClicked, [&](QTreeWidgetItem* item, int)
   {
     QString modelName = item->data(0, Qt::UserRole).toString();
 
@@ -183,8 +183,7 @@ contextMenuEvent(QContextMenuEvent *event)
   });
 
   //Setup filtering
-  connect(txtBox, &QLineEdit::textChanged, [&](const QString &text)
-  {
+  connect(txtBox, &QLineEdit::textChanged, [&](const QString& text) {
     for (auto& topLvlItem : topLevelItems)
     {
       for (int i = 0; i < topLvlItem->childCount(); ++i)
@@ -206,8 +205,14 @@ contextMenuEvent(QContextMenuEvent *event)
 
 void
 FlowView::
-wheelEvent(QWheelEvent *event)
+wheelEvent(QWheelEvent* event)
 {
+  /// KW Add start
+  QGraphicsView::wheelEvent(event);
+  if (event->isAccepted())
+    return;
+  /// KW Add stop
+
   QPoint delta = event->angleDelta();
 
   if (delta.y() == 0)
@@ -229,7 +234,7 @@ void
 FlowView::
 scaleUp()
 {
-  double const step   = 1.2;
+  double const step = 1.2;
   double const factor = std::pow(step, 1.0);
 
   QTransform t = transform();
@@ -245,7 +250,7 @@ void
 FlowView::
 scaleDown()
 {
-  double const step   = 1.2;
+  double const step = 1.2;
   double const factor = std::pow(step, -1.0);
 
   scale(factor, factor);
@@ -259,7 +264,7 @@ deleteSelectedNodes()
   // Delete the selected connections first, ensuring that they won't be
   // automatically deleted when selected nodes are deleted (deleting a node
   // deletes some connections as well)
-  for (QGraphicsItem * item : _scene->selectedItems())
+  for (QGraphicsItem* item : _scene->selectedItems())
   {
     if (auto c = qgraphicsitem_cast<ConnectionGraphicsObject*>(item))
       _scene->deleteConnection(c->connection());
@@ -269,7 +274,7 @@ deleteSelectedNodes()
   // Selected connections were already deleted prior to this loop, otherwise
   // qgraphicsitem_cast<NodeGraphicsObject*>(item) could be a use-after-free
   // when a selected connection is deleted by deleting the node.
-  for (QGraphicsItem * item : _scene->selectedItems())
+  for (QGraphicsItem* item : _scene->selectedItems())
   {
     if (auto n = qgraphicsitem_cast<NodeGraphicsObject*>(item))
       _scene->removeNode(n->node());
@@ -279,7 +284,7 @@ deleteSelectedNodes()
 
 void
 FlowView::
-keyPressEvent(QKeyEvent *event)
+keyPressEvent(QKeyEvent* event)
 {
   switch (event->key())
   {
@@ -297,7 +302,7 @@ keyPressEvent(QKeyEvent *event)
 
 void
 FlowView::
-keyReleaseEvent(QKeyEvent *event)
+keyReleaseEvent(QKeyEvent* event)
 {
   switch (event->key())
   {
@@ -314,7 +319,7 @@ keyReleaseEvent(QKeyEvent *event)
 
 void
 FlowView::
-mousePressEvent(QMouseEvent *event)
+mousePressEvent(QMouseEvent* event)
 {
   QGraphicsView::mousePressEvent(event);
   if (event->button() == Qt::LeftButton)
@@ -326,7 +331,7 @@ mousePressEvent(QMouseEvent *event)
 
 void
 FlowView::
-mouseMoveEvent(QMouseEvent *event)
+mouseMoveEvent(QMouseEvent* event)
 {
   QGraphicsView::mouseMoveEvent(event);
   if (scene()->mouseGrabberItem() == nullptr && event->buttons() == Qt::LeftButton)
@@ -347,35 +352,34 @@ drawBackground(QPainter* painter, const QRectF& r)
 {
   QGraphicsView::drawBackground(painter, r);
 
-  auto const &flowViewStyle = StyleCollection::flowViewStyle();
+  auto const& flowViewStyle = StyleCollection::flowViewStyle();
 
-  auto drawGrid = [&](double gridStep)
-  {
-      QRect   windowRect = rect();
-      QPointF tl = mapToScene(windowRect.topLeft());
-      QPointF br = mapToScene(windowRect.bottomRight());
+  auto drawGrid = [&](double gridStep) {
+    QRect windowRect = rect();
+    QPointF tl = mapToScene(windowRect.topLeft());
+    QPointF br = mapToScene(windowRect.bottomRight());
 
-      double left = std::floor(tl.x() / gridStep - 0.5);
-      double right = std::floor(br.x() / gridStep + 1.0);
-      double bottom = std::floor(tl.y() / gridStep - 0.5);
-      double top = std::floor(br.y() / gridStep + 1.0);
+    double left = std::floor(tl.x() / gridStep - 0.5);
+    double right = std::floor(br.x() / gridStep + 1.0);
+    double bottom = std::floor(tl.y() / gridStep - 0.5);
+    double top = std::floor(br.y() / gridStep + 1.0);
 
-      // vertical lines
-      for (int xi = int(left); xi <= int(right); ++xi)
-      {
-          QLineF line(xi * gridStep, bottom * gridStep,
-              xi * gridStep, top * gridStep);
+    // vertical lines
+    for (int xi = int(left); xi <= int(right); ++xi)
+    {
+      QLineF line(xi * gridStep, bottom * gridStep,
+                  xi * gridStep, top * gridStep);
 
-          painter->drawLine(line);
-      }
+      painter->drawLine(line);
+    }
 
-      // horizontal lines
-      for (int yi = int(bottom); yi <= int(top); ++yi)
-      {
-          QLineF line(left * gridStep, yi * gridStep,
-              right * gridStep, yi * gridStep);
-          painter->drawLine(line);
-      }
+    // horizontal lines
+    for (int yi = int(bottom); yi <= int(top); ++yi)
+    {
+      QLineF line(left * gridStep, yi * gridStep,
+                  right * gridStep, yi * gridStep);
+      painter->drawLine(line);
+    }
   };
 
   QBrush bBrush = backgroundBrush();
@@ -394,14 +398,14 @@ drawBackground(QPainter* painter, const QRectF& r)
 
 void
 FlowView::
-showEvent(QShowEvent *event)
+showEvent(QShowEvent* event)
 {
   _scene->setSceneRect(this->rect());
   QGraphicsView::showEvent(event);
 }
 
 
-FlowScene *
+FlowScene*
 FlowView::
 scene()
 {

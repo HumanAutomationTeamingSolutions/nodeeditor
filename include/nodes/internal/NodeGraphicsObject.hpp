@@ -3,6 +3,7 @@
 #include <QtCore/QUuid>
 #include <QtWidgets/QGraphicsObject>
 
+
 #include "Connection.hpp"
 
 #include "NodeGeometry.hpp"
@@ -11,6 +12,7 @@
 #include "Export.hpp"
 
 class QGraphicsProxyWidget;
+class QGraphicsSceneWheelEvent;
 
 namespace QtNodes
 {
@@ -88,6 +90,9 @@ protected:
 
   void
   contextMenuEvent(QGraphicsSceneContextMenuEvent* event) override;
+
+  void
+  wheelEvent(QGraphicsSceneWheelEvent * event) override;
 
 private:
   void
