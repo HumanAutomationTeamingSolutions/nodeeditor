@@ -8,7 +8,8 @@ find_package(Qt5 REQUIRED COMPONENTS
              Core
              Widgets
              Gui
-             OpenGL)
+             OpenGL
+             Svg)
 
 if(NOT TARGET NodeEditor::nodes)
     include("${NodeEditor_CMAKE_DIR}/NodeEditorTargets.cmake")
