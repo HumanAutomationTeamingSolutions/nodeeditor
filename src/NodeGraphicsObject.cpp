@@ -187,14 +187,7 @@ paint(QPainter* painter,
   Q_UNUSED(widget);
 
   painter->setClipRect(option->exposedRect);
-
-//    auto d = option->exposedRect;
-//    painter->setPen(QColor("#0063b1"));
-//    painter->setBrush(Qt::gray);
-//    painter->drawRoundedRect(d, 5, 5);
-
   NodePainter::paint(painter, _node, _scene);
-
 }
 
 
