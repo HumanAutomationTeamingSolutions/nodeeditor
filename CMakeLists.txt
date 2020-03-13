@@ -41,6 +41,39 @@ find_package(Qt5 5.3 COMPONENTS
              OpenGL
              Svg)
 
+#  overit QT5_MAKE_OUTPUT_FILE QT Vershon
+# macro used to create the names of output files preserving relative dirs
+macro(QT5_MAKE_OUTPUT_FILE infile prefix ext outfile)
+    string(LENGTH ${CMAKE_CURRENT_BINARY_DIR} _binlength)
+    string(LENGTH ${infile} _infileLength)
+    set(_checkinfile ${CMAKE_CURRENT_SOURCE_DIR})
+    if (_infileLength GREATER _binlength)
+        string(SUBSTRING "${infile}" 0 ${_binlength} _checkinfile)
+        if (_checkinfile STREQUAL "${CMAKE_CURRENT_BINARY_DIR}")
+            file(RELATIVE_PATH rel ${CMAKE_CURRENT_BINARY_DIR} ${infile})
+        else ()
+            file(RELATIVE_PATH rel ${CMAKE_CURRENT_SOURCE_DIR} ${infile})
+        endif ()
+    else ()
+        file(RELATIVE_PATH rel ${CMAKE_CURRENT_SOURCE_DIR} ${infile})
+    endif ()
+    if (WIN32 AND rel MATCHES "^([a-zA-Z]):(.*)$") # absolute path
+        set(rel "${CMAKE_MATCH_1}_${CMAKE_MATCH_2}")
+    endif ()
+    set(_outfile "${CMAKE_CURRENT_BINARY_DIR}/${rel}")
+    string(REPLACE ".." "__" _outfile ${_outfile})
+    get_filename_component(outpath ${_outfile} PATH)
+
+    get_filename_component(_outfile ${_outfile} NAME)
+    string(REGEX REPLACE "\\.[^.]*$" "" _outfile ${_outfile})
+
+    file(MAKE_DIRECTORY ${outpath})
+    set(${outfile} ${outpath}/${prefix}${_outfile}.${ext})
+
+    #    message(STATUS "_outfile_o ${_outfile_o} \n rel ${rel} \n CMAKE_CURRENT_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR} \n _outfile ${_outfile} \n out path ${outpath} \n ${outfile} ${${outfile}}")
+endmacro()
+
+
 qt5_add_resources(RESOURCES ./resources/resources.qrc)
 
 # Unfortunately, as we have a split include/src, AUTOMOC doesn't work.
