@@ -1,6 +1,7 @@
 #pragma once
 
 #include <QtGui/QColor>
+#include <QMap>
 
 #include "Export.hpp"
 #include "Style.hpp"
@@ -50,6 +51,7 @@ private:
   QColor SelectedColor;
   QColor SelectedHaloColor;
   QColor HoveredColor;
+  QMap<QString, QColor> typeId_to_color;
 
   float LineWidth;
   float ConstructionLineWidth;

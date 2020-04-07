@@ -46,13 +46,13 @@ setConnectionStyle(QString jsonText)
 }
 
 #ifdef STYLE_DEBUG
-  #define CONNECTION_STYLE_CHECK_UNDEFINED_VALUE(v, variable) { \
+#define CONNECTION_STYLE_CHECK_UNDEFINED_VALUE(v, variable) { \
       if (v.type() == QJsonValue::Undefined || \
           v.type() == QJsonValue::Null) \
         qWarning() << "Undefined value for parameter:" << #variable; \
   }
 #else
-  #define CONNECTION_STYLE_CHECK_UNDEFINED_VALUE(v, variable)
+#define CONNECTION_STYLE_CHECK_UNDEFINED_VALUE(v, variable)
 #endif
 
 
@@ -118,7 +118,7 @@ loadJsonText(QString jsonText)
 
 void
 ConnectionStyle::
-loadJsonFromByteArray(QByteArray const &byteArray)
+loadJsonFromByteArray(QByteArray const& byteArray)
 {
   QJsonDocument json(QJsonDocument::fromJson(byteArray));
 
@@ -162,19 +162,52 @@ QColor
 ConnectionStyle::
 normalColor(QString typeId) const
 {
-  std::size_t hash = qHash(typeId, 50);
+  if (typeId_to_color.contains(typeId))
+    return typeId_to_color.value(typeId);
+
+  uint hash_seed = 50;
+  std::size_t hash = qHash(typeId, hash_seed);
   std::size_t const hue_range = 0xFF;
 
-  //qsrand(hash);
-  //std::size_t hue = qrand() % hue_range;
-  std::size_t hue = hash % hue_range;
+  QColor test_color;
+  while (hash_seed != 0)
+  {
+    //qsrand(hash);
+    //std::size_t hue = qrand() % hue_range;
+    std::size_t hue = hash % hue_range;
 
-  //std::size_t sat = 120 + hash % 129;
-  std::size_t sat = 90 + hash % 129;
+    //std::size_t sat = 120 + hash % 129;
+    std::size_t sat = 90 + hash % 129;
 
-  return QColor::fromHsl(hue,
-                         sat,
-                         160);
+//    qDebug() << typeId << "hash" << hash << "hue" << hue << "sat" << sat;
+
+    bool is_ok = true;
+    test_color = QColor::fromHsl(hue, sat, 160);
+    for (const auto& i : typeId_to_color)
+    {
+      bool r_t = abs(i.red() - test_color.red()) < 20;
+      bool g_t = abs(i.green() - test_color.green()) < 20;
+      bool b_t = abs(i.blue() - test_color.blue()) < 20;
+//      qDebug() << "i" << i.toRgb() << "test_color" << test_color.toRgb() << r_t << g_t << b_t;
+
+      if ((r_t + g_t + b_t) >= 2)
+      {
+        is_ok = false;
+        break;
+      }
+    }
+
+    if (is_ok)
+    {
+      break;
+    }
+
+    hash_seed--;
+    hash = qHash(typeId, hash_seed);
+  }
+
+  const_cast<ConnectionStyle*>(this)->typeId_to_color.insert(typeId, test_color);
+  return test_color;
 }
 
 
