@@ -180,15 +180,23 @@ normalColor(QString typeId) const
 //    qDebug() << typeId << "hash" << hash << "hue" << hue << "sat" << sat << "hash_seed" << hash_seed;
 
     bool is_ok = true;
-    test_color = QColor::fromHsl(hue, sat, 160);
-    for (const auto& i : typeId_to_color)
+    test_color = QColor::fromHsl(hue, sat, 160 + ((hash % 40) - 20));
+    for (auto i = typeId_to_color.constBegin(); i != typeId_to_color.constEnd(); i++)
     {
-      int r_t = abs(i.red() - test_color.red());
-      int g_t = abs(i.green() - test_color.green());
-      int b_t = abs(i.blue() - test_color.blue());
-//      qDebug() << "i" << i.toRgb() << "test_color" << test_color.toRgb() << r_t << g_t << b_t;
+      const auto& v = i.value();
 
-      if ((r_t + g_t + b_t) <= 50)
+      int r_t = abs(v.red() - test_color.red());
+      r_t = r_t * r_t;
+
+      int g_t = abs(v.green() - test_color.green());
+      g_t = g_t * g_t;
+
+      int b_t = abs(v.blue() - test_color.blue());
+      b_t = b_t * b_t;
+
+//      qDebug() << i.key() << "i" << v.toRgb() << "test_color" << test_color.toRgb() << r_t << g_t << b_t;
+
+      if ((r_t + g_t + b_t) <= 2000)
       {
         is_ok = false;
         break;
@@ -203,6 +211,7 @@ normalColor(QString typeId) const
     hash_seed--;
     hash = qHash(typeId, hash_seed);
   }
+
 
   const_cast<ConnectionStyle*>(this)->typeId_to_color.insert(typeId, test_color);
   return test_color;
