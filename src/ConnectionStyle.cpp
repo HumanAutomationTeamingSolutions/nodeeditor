@@ -183,9 +183,9 @@ normalColor(QString typeId) const
     test_color = QColor::fromHsl(hue, sat, 160);
     for (const auto& i : typeId_to_color)
     {
-      int r_t = abs(i.red() - test_color.red()) ;
-      int g_t = abs(i.green() - test_color.green()) ;
-      int b_t = abs(i.blue() - test_color.blue()) ;
+      int r_t = abs(i.red() - test_color.red());
+      int g_t = abs(i.green() - test_color.green());
+      int b_t = abs(i.blue() - test_color.blue());
 //      qDebug() << "i" << i.toRgb() << "test_color" << test_color.toRgb() << r_t << g_t << b_t;
 
       if ((r_t + g_t + b_t) <= 50)
