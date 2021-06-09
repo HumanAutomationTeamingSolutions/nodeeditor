@@ -7,6 +7,7 @@
 
 namespace std
 {
+#if QT_VERSION <= QT_VERSION_CHECK(5, 13, 0)
 template<>
 struct hash<QString>
 {
@@ -16,4 +17,5 @@ struct hash<QString>
     return qHash(s);
   }
 };
+#endif
 }
